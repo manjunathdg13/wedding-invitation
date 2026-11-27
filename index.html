@@ -1194,7 +1194,7 @@
     }
 
     /* ==========================================================================
-       9. SECTION 4 CAROUSEL & SECTION 5 PHOTO GALLERY
+       9. SECTIONS 4 & 5 — 3D SIDE-PREVIEW CAROUSELS
        ========================================================================== */
     .carousel-3d-viewport {
       position: relative;
@@ -1330,35 +1330,12 @@
       height: 440px;
     }
 
-    .story-stage.story-gallery-mode {
-      height: auto;
-      min-height: 0;
-      perspective: none;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-      align-items: start;
-      justify-items: center;
-      gap: 18px;
-    }
-
     .story-slide {
       width: min(280px, 74vw);
       background: var(--color-card-bg);
       padding: 10px 10px 14px;
       border-radius: 20px;
       border: 1.5px solid var(--color-metallic);
-    }
-
-    .story-stage.story-gallery-mode .story-slide {
-      position: relative;
-      inset: auto;
-      width: 100%;
-      max-width: 320px;
-      transform: none;
-      opacity: 1;
-      filter: none;
-      z-index: auto;
-      cursor: default;
     }
 
     .story-photo-frame {
@@ -2151,7 +2128,7 @@
     </section>
 
     <!-- ======================================================================
-         SECTION 5 — OUR STORY PHOTO GALLERY
+         SECTION 5 — OUR STORY: 3D SWIPEABLE PHOTO CAROUSEL
          ====================================================================== -->
     <section id="section-story" class="inv-section reveal-on-scroll" aria-labelledby="heading-story">
       <div class="section-header">
@@ -2165,6 +2142,15 @@
 
       <div class="carousel-3d-viewport" id="story-carousel-viewport">
         <div class="carousel-3d-stage story-stage" id="story-carousel-stage"></div>
+        <div class="carousel-controls" id="story-carousel-controls">
+          <button type="button" class="carousel-arrow" id="story-prev" aria-label="Previous photograph">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div class="carousel-dots" id="story-dots"></div>
+          <button type="button" class="carousel-arrow" id="story-next" aria-label="Next photograph">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -2486,9 +2472,9 @@
             caption: "Smiles that tell our story"
           },
           {
-            id: "IMG_2694",
-            label: "IMG_2694.JPG",
-            src: "photos/IMG_2694.JPG",
+            id: "DSC_6947",
+            label: "DSC_6947.jpg",
+            src: "photos/DSC_6947.jpg",
             caption: "Together is our favourite place"
           },
           {
@@ -2801,7 +2787,8 @@
     const appState = {
       bookOpened: false,
       scrollUnrolled: false,
-      eventIndex: 0
+      eventIndex: 0,
+      storyIndex: 0
     };
 
     /* ========================================================================
@@ -3361,12 +3348,14 @@
     }
 
     /* ========================================================================
-       SECTION 5: OUR STORY PHOTO GALLERY
+       SECTION 5: OUR STORY 3D SWIPEABLE PHOTO CAROUSEL
        ======================================================================== */
     function renderStoryCarousel() {
       const photos = WEDDING_CONFIG.media.photos || [];
       const section = document.getElementById("section-story");
       const stage = document.getElementById("story-carousel-stage");
+      const controls = document.getElementById("story-carousel-controls");
+      const dotsWrap = document.getElementById("story-dots");
 
       if (photos.length === 0) {
         section.style.display = "none";
@@ -3375,9 +3364,17 @@
 
       section.style.display = "block";
       stage.innerHTML = "";
-      stage.classList.add("story-gallery-mode");
+      dotsWrap.innerHTML = "";
 
-      photos.forEach((photo) => {
+      if (photos.length === 1) {
+        stage.classList.add("single-card-mode");
+        controls.style.display = "none";
+      } else {
+        stage.classList.remove("single-card-mode");
+        controls.style.display = "flex";
+      }
+
+      photos.forEach((photo, idx) => {
         const slide = document.createElement("figure");
         slide.className = "c3d-slide story-slide";
 
@@ -3401,8 +3398,32 @@
           slide.appendChild(cap);
         }
 
+        slide.addEventListener("click", () => {
+          if (photos.length > 1 && appState.storyIndex !== idx) {
+            appState.storyIndex = idx;
+            updateCarouselPositions(stage, dotsWrap, appState.storyIndex, photos.length);
+          }
+        });
+
         stage.appendChild(slide);
+
+        if (photos.length > 1) {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "c-dot";
+          dot.setAttribute("aria-label", `Go to photo ${idx + 1}`);
+          dot.addEventListener("click", () => {
+            appState.storyIndex = idx;
+            updateCarouselPositions(stage, dotsWrap, appState.storyIndex, photos.length);
+          });
+          dotsWrap.appendChild(dot);
+        }
       });
+
+      if (photos.length > 1) {
+        appState.storyIndex %= photos.length;
+        updateCarouselPositions(stage, dotsWrap, appState.storyIndex, photos.length);
+      }
     }
 
     function updateCarouselPositions(stageEl, dotsEl, activeIdx, total) {
@@ -3751,6 +3772,37 @@
         () => document.getElementById("events-next").click(),
         () => document.getElementById("events-prev").click()
       );
+
+      // Our Story Photo Carousel Controls & Touch Swipe
+      const storyViewport = document.getElementById("story-carousel-viewport");
+      const storyStage = document.getElementById("story-carousel-stage");
+      const storyDots = document.getElementById("story-dots");
+
+      document.getElementById("story-prev").addEventListener("click", () => {
+        const len = WEDDING_CONFIG.media.photos.length;
+        if (len <= 1) return;
+        appState.storyIndex = (appState.storyIndex - 1 + len) % len;
+        updateCarouselPositions(storyStage, storyDots, appState.storyIndex, len);
+      });
+      document.getElementById("story-next").addEventListener("click", () => {
+        const len = WEDDING_CONFIG.media.photos.length;
+        if (len <= 1) return;
+        appState.storyIndex = (appState.storyIndex + 1) % len;
+        updateCarouselPositions(storyStage, storyDots, appState.storyIndex, len);
+      });
+      bindSwipeGesture(
+        storyViewport,
+        () => document.getElementById("story-next").click(),
+        () => document.getElementById("story-prev").click()
+      );
+
+      if (WEDDING_CONFIG.media.photos.length > 1) {
+        window.setInterval(() => {
+          if (!document.hidden) {
+            document.getElementById("story-next").click();
+          }
+        }, 4500);
+      }
 
       // IntersectionObserver for smooth scroll reveals
       const observer = new IntersectionObserver((entries) => {
