@@ -202,34 +202,6 @@
       gap: 10px;
     }
 
-    .music-control {
-      position: fixed;
-      right: 16px;
-      bottom: max(16px, env(safe-area-inset-bottom));
-      z-index: 91;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 1.5px solid var(--color-metallic);
-      background: rgba(255, 253, 249, 0.96);
-      color: var(--color-primary);
-      box-shadow: 0 8px 24px rgba(42, 28, 30, 0.22);
-      display: grid;
-      place-items: center;
-      backdrop-filter: blur(8px);
-      touch-action: manipulation;
-    }
-
-    .music-control.is-playing {
-      background: var(--color-primary);
-      color: var(--color-metallic-light);
-      animation: musicPulse 1.8s ease-in-out infinite;
-    }
-
-    @keyframes musicPulse {
-      50% { box-shadow: 0 8px 28px rgba(92, 26, 38, 0.38), 0 0 0 6px rgba(197, 155, 67, 0.12); }
-    }
-
     .fab-btn {
       display: inline-flex;
       align-items: center;
@@ -256,6 +228,29 @@
       background: rgba(255, 253, 249, 0.96);
       color: var(--color-primary);
       border: 1.5px solid var(--color-metallic);
+    }
+
+    .sound-control {
+      position: fixed;
+      right: 16px;
+      bottom: max(16px, env(safe-area-inset-bottom));
+      z-index: 91;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1.5px solid var(--color-metallic);
+      background: rgba(255, 253, 249, 0.96);
+      color: var(--color-primary);
+      box-shadow: 0 8px 24px rgba(42, 28, 30, 0.22);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .sound-control.is-playing {
+      background: var(--color-primary);
+      color: var(--color-metallic-light);
       backdrop-filter: blur(8px);
       padding: 12px 18px;
       min-height: 44px;
@@ -1885,7 +1880,6 @@
       .scroll-cue,
       .tassel-svg,
       .pull-hint-badge,
-      .music-control.is-playing,
       .book-stage.is-opening .cover-face::after,
       .scroll-artifact-wrapper.is-unrolling .scroll-parchment::after,
       .scroll-artifact-wrapper.is-unrolling .scroll-bottom-roller,
@@ -1896,7 +1890,7 @@
   </style>
 </head>
 <body>
-  <button type="button" class="music-control" id="music-control" aria-label="Play background music" aria-pressed="false">
+  <button type="button" class="sound-control" id="sound-control" aria-label="Play pleasant background sound" aria-pressed="false">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
       <path d="M9 18V5l10-2v13"/>
       <circle cx="6" cy="18" r="3"/>
@@ -3067,120 +3061,87 @@
     /* ========================================================================
        SECTION 1: 3D VELVET BOOK OPENING SEQUENCE
        ======================================================================== */
-    let ambientAudioContext = null;
-    let ambientMasterGain = null;
-    let ambientOscillators = [];
-    let ambientPadOscillators = [];
-    let ambientMusicTimer = null;
-    let ambientMusicStep = 0;
-    let musicPlaying = false;
+    let pleasantAudioContext = null;
+    let pleasantMasterGain = null;
+    let pleasantOscillators = [];
+    let pleasantTimer = null;
+    let pleasantStep = 0;
+    let pleasantPlaying = false;
 
-    function setMusicControlState(isPlaying) {
-      const control = document.getElementById("music-control");
+    function setSoundControlState(isPlaying) {
+      const control = document.getElementById("sound-control");
       if (!control) return;
       control.classList.toggle("is-playing", isPlaying);
       control.setAttribute("aria-pressed", String(isPlaying));
-      control.setAttribute("aria-label", isPlaying ? "Pause background music" : "Play background music");
+      control.setAttribute("aria-label", isPlaying ? "Pause pleasant background sound" : "Play pleasant background sound");
     }
 
-    function startAmbientMusic() {
-      if (musicPlaying) return;
+    function playPleasantNote(frequency) {
+      if (!pleasantAudioContext || !pleasantMasterGain) return;
+      const now = pleasantAudioContext.currentTime;
+      const oscillator = pleasantAudioContext.createOscillator();
+      const gain = pleasantAudioContext.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(frequency, now);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(0.035, now + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+      oscillator.connect(gain);
+      gain.connect(pleasantMasterGain);
+      oscillator.start(now);
+      oscillator.stop(now + 2.45);
+      pleasantOscillators.push(oscillator);
+      oscillator.addEventListener("ended", () => {
+        pleasantOscillators = pleasantOscillators.filter((item) => item !== oscillator);
+        gain.disconnect();
+      }, { once: true });
+    }
+
+    function startPleasantSound() {
+      if (pleasantPlaying) return;
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return;
 
-      if (!ambientAudioContext) {
-        ambientAudioContext = new AudioContextClass();
-        ambientMasterGain = ambientAudioContext.createGain();
-        ambientMasterGain.gain.value = 0.0001;
-        ambientMasterGain.connect(ambientAudioContext.destination);
+      if (!pleasantAudioContext) {
+        pleasantAudioContext = new AudioContextClass();
+        pleasantMasterGain = pleasantAudioContext.createGain();
+        pleasantMasterGain.gain.value = 0.42;
+        pleasantMasterGain.connect(pleasantAudioContext.destination);
       }
 
-      if (ambientPadOscillators.length === 0) {
-        const padFrequencies = [130.81, 164.81, 196];
-        ambientPadOscillators = padFrequencies.map((frequency, index) => {
-          const oscillator = ambientAudioContext.createOscillator();
-          const gain = ambientAudioContext.createGain();
-          oscillator.type = index === 0 ? "sine" : "triangle";
-          oscillator.frequency.value = frequency;
-          gain.gain.value = index === 0 ? 0.16 : 0.08;
-          oscillator.connect(gain);
-          gain.connect(ambientMasterGain);
-          oscillator.start();
-          return oscillator;
-        });
-      }
-
-      ambientAudioContext.resume();
-      const chords = [
-        [130.81, 164.81, 196],
-        [98, 123.47, 146.83],
-        [110, 130.81, 164.81],
-        [87.31, 110, 130.81]
-      ];
+      pleasantAudioContext.resume();
       const melody = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46];
-      ambientMusicStep = 0;
-      ambientMasterGain.gain.setTargetAtTime(0.055, ambientAudioContext.currentTime, 0.8);
-
-      const playNote = (frequency) => {
-        const oscillator = ambientAudioContext.createOscillator();
-        const gain = ambientAudioContext.createGain();
-        oscillator.type = "sine";
-        oscillator.frequency.value = frequency;
-        const now = ambientAudioContext.currentTime;
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(0.22, now + 0.035);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
-        oscillator.connect(gain);
-        gain.connect(ambientMasterGain);
-        oscillator.start();
-        oscillator.stop(now + 1.45);
-        oscillator.addEventListener("ended", () => {
-          ambientOscillators = ambientOscillators.filter((active) => active !== oscillator);
-          gain.disconnect();
-        }, { once: true });
-        return oscillator;
-      };
-
+      pleasantStep = 0;
       const playStep = () => {
-        const chord = chords[Math.floor(ambientMusicStep / 8) % chords.length];
-        ambientPadOscillators.forEach((oscillator, index) => {
-          oscillator.frequency.setTargetAtTime(chord[index], ambientAudioContext.currentTime, 0.8);
-        });
-        ambientOscillators.push(playNote(melody[ambientMusicStep % melody.length]));
-        ambientMusicStep += 1;
+        playPleasantNote(melody[pleasantStep % melody.length]);
+        pleasantStep += 1;
       };
       playStep();
-      ambientMusicTimer = window.setInterval(playStep, 700);
-      musicPlaying = true;
-      setMusicControlState(true);
+      pleasantTimer = window.setInterval(playStep, 1400);
+      pleasantPlaying = true;
+      setSoundControlState(true);
     }
 
-    function stopAmbientMusic() {
-      if (ambientMusicTimer !== null) {
-        window.clearInterval(ambientMusicTimer);
-        ambientMusicTimer = null;
+    function stopPleasantSound() {
+      if (pleasantTimer !== null) {
+        window.clearInterval(pleasantTimer);
+        pleasantTimer = null;
       }
-      if (ambientAudioContext && ambientMasterGain) {
-        ambientMasterGain.gain.setTargetAtTime(0.0001, ambientAudioContext.currentTime, 0.15);
-      }
-      ambientOscillators = [];
-      ambientPadOscillators.forEach((oscillator) => {
-        oscillator.stop();
-      });
-      ambientPadOscillators = [];
-      musicPlaying = false;
-      setMusicControlState(false);
+      pleasantOscillators.forEach((oscillator) => oscillator.stop());
+      pleasantOscillators = [];
+      pleasantPlaying = false;
+      setSoundControlState(false);
     }
 
-    function toggleAmbientMusic() {
-      if (musicPlaying) stopAmbientMusic();
-      else startAmbientMusic();
+    function togglePleasantSound() {
+      if (pleasantPlaying) stopPleasantSound();
+      else startPleasantSound();
     }
 
     function openInvitationBook() {
       if (appState.bookOpened) return;
       appState.bookOpened = true;
-      startAmbientMusic();
+      startPleasantSound();
 
       const bookStage = document.getElementById("book-stage");
       const bookSection = document.getElementById("section-book");
@@ -3784,7 +3745,7 @@
       renderInvitationContent();
       updateCountdown();
       setInterval(updateCountdown, 1000);
-      document.getElementById("music-control").addEventListener("click", toggleAmbientMusic);
+      document.getElementById("sound-control").addEventListener("click", togglePleasantSound);
 
       // Smooth anchor scrolling for internal section links
       document.querySelectorAll('a[href^="#"]').forEach((link) => {
