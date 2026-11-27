@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
   <meta name="theme-color" content="#5C1A26" />
   <title>Manjunath &amp; Komal — Wedding Invitation</title>
+  <link rel="preload" as="image" href="photos/IMG_2692.JPG" fetchpriority="high" />
 
   <!-- Google Fonts with graceful system serif/sans fallbacks -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -302,6 +303,21 @@
       animation: gentleSway 6s ease-in-out infinite alternate;
     }
 
+    .stage-florals-top > g {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: flowerBloom 3.8s ease-in-out infinite;
+    }
+
+    .stage-florals-top > g:nth-of-type(even) {
+      animation-delay: -1.9s;
+    }
+
+    @keyframes flowerBloom {
+      0%, 100% { transform: scale(0.94); opacity: 0.82; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+
     .stage-florals-bottom {
       position: absolute;
       bottom: -8px;
@@ -418,6 +434,20 @@
 
     .book-stage.is-opening .book-front-cover {
       transform: rotateY(-164deg);
+    }
+
+    .book-stage.is-opening .cover-face::after {
+      content: "";
+      position: absolute;
+      inset: -50%;
+      background: linear-gradient(110deg, transparent 42%, rgba(255, 232, 164, 0.42) 50%, transparent 58%);
+      transform: translateX(-75%) rotate(18deg);
+      animation: coverShimmer 1.15s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes coverShimmer {
+      to { transform: translateX(75%) rotate(18deg); }
     }
 
     .cover-face {
@@ -693,7 +723,7 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 50% 45%, rgba(255, 251, 243, 0.84) 0%, rgba(251, 247, 240, 0.90) 64%, rgba(58, 14, 22, 0.55) 100%);
+        radial-gradient(circle at 50% 45%, rgba(255, 251, 243, 0.68) 0%, rgba(251, 247, 240, 0.76) 64%, rgba(58, 14, 22, 0.4) 100%);
     }
 
     .hero-card-frame {
@@ -706,7 +736,7 @@
       border: 1.5px solid var(--color-metallic);
       border-radius: 24px;
       padding: clamp(14px, 2.6vh, 26px) clamp(16px, 4.5vw, 28px);
-      background: rgba(255, 253, 249, 0.78);
+      background: rgba(255, 253, 249, 0.7);
       backdrop-filter: blur(6px);
       box-shadow: 0 20px 50px rgba(34, 12, 16, 0.22), inset 0 0 0 4px rgba(197, 155, 67, 0.16);
       display: flex;
@@ -742,6 +772,19 @@
       width: clamp(44px, 6.6vh, 60px);
       height: clamp(44px, 6.6vh, 60px);
       color: var(--color-primary);
+      flex-shrink: 0;
+      animation: emblemGlow 3.6s ease-in-out infinite;
+    }
+
+    @keyframes emblemGlow {
+      0%, 100% { filter: drop-shadow(0 0 0 rgba(197, 155, 67, 0)); }
+      50% { filter: drop-shadow(0 0 8px rgba(197, 155, 67, 0.46)); }
+    }
+
+    .hero-floral-divider {
+      width: min(154px, 48%);
+      height: 18px;
+      color: var(--color-metallic-dark);
       flex-shrink: 0;
     }
 
@@ -794,16 +837,35 @@
 
     .hero-family-line {
       font-family: var(--font-body);
-      font-size: clamp(0.76rem, 2.2vw, 0.86rem);
+      font-size: clamp(0.8rem, 2.2vw, 0.92rem);
       color: var(--color-text-muted);
       font-weight: 500;
-      line-height: 1.35;
+      line-height: 1.25;
       max-width: 92%;
+      text-align: center;
+    }
+
+    .hero-family-line .family-relation,
+    .hero-family-line strong {
+      display: block;
+    }
+
+    .hero-family-line .family-relation {
+      color: var(--color-metallic-dark);
+      font-family: var(--font-heading);
+      font-size: 0.64em;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      line-height: 1.2;
+      text-transform: uppercase;
     }
 
     .hero-family-line strong {
-      color: var(--color-text);
+      color: var(--color-primary);
+      font-family: var(--font-couple);
+      font-size: 1.12em;
       font-weight: 600;
+      letter-spacing: 0.015em;
     }
 
     .hero-ampersand {
@@ -916,6 +978,25 @@
       touch-action: pan-y;
     }
 
+    .scroll-parchment::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.68) 50%, transparent 65%);
+      transform: translateX(-100%);
+    }
+
+    .scroll-artifact-wrapper.is-unrolling .scroll-parchment::after {
+      opacity: 1;
+      animation: parchmentGlimmer 1.25s ease-out;
+    }
+
+    @keyframes parchmentGlimmer {
+      to { transform: translateX(100%); opacity: 0; }
+    }
+
     .scroll-artifact-wrapper.unrolled .scroll-parchment {
       max-height: 760px;
       overflow: visible;
@@ -929,13 +1010,13 @@
       text-align: center;
       position: relative;
       opacity: 0;
-      transform: translateY(-10px);
-      transition: opacity 0.7s ease 0.3s, transform 0.7s ease 0.3s;
+      transform: translateY(-18px) scale(0.97);
+      transition: opacity 0.7s ease 0.35s, transform 0.7s var(--transition-smooth) 0.35s;
     }
 
     .scroll-artifact-wrapper.unrolled .scroll-inner-content {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
 
     .scroll-inner-content::before {
@@ -961,6 +1042,35 @@
       justify-content: center;
     }
 
+    .scroll-artifact-wrapper.is-unrolling .scroll-bottom-roller {
+      animation: rollerUnfurl 0.85s var(--transition-smooth);
+    }
+
+    @keyframes rollerUnfurl {
+      0% { transform: translateY(-12px) scaleX(0.92); }
+      65% { transform: translateY(5px) scaleX(1.03); }
+      100% { transform: translateY(0) scaleX(1); }
+    }
+
+    .scroll-artifact-wrapper.is-unrolling::before {
+      content: "";
+      position: absolute;
+      z-index: 9;
+      top: 44%;
+      left: 50%;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: radial-gradient(circle, rgba(232, 207, 142, 0.56), rgba(197, 155, 67, 0.18) 35%, transparent 72%);
+      transform: translate(-50%, -50%) scale(0.25);
+      animation: scrollSparkle 1s ease-out forwards;
+    }
+
+    @keyframes scrollSparkle {
+      55% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+    }
     .tassel-handle {
       position: relative;
       z-index: 8;
@@ -1678,20 +1788,22 @@
       }
 
       .hero-card-frame {
-        height: calc(100dvh - 16px);
+        height: auto;
+        min-height: min(680px, calc(100dvh - 16px));
         max-height: none;
         border-radius: 18px;
-        padding: 12px 14px;
-        justify-content: space-evenly;
+        padding: 16px 14px;
+        justify-content: center;
+        gap: clamp(12px, 2.4vh, 22px);
       }
 
       .hero-emblem {
-        width: 42px;
-        height: 42px;
+        width: 48px;
+        height: 48px;
       }
 
       .hero-intro-line {
-        margin: 2px 0;
+        margin: 0;
       }
 
       .hero-couple-block {
@@ -1699,21 +1811,25 @@
       }
 
       .hero-person-name {
-        font-size: clamp(1.85rem, 8.5vw, 2.35rem);
+        font-size: clamp(2rem, 9vw, 2.55rem);
       }
 
       .hero-family-line {
-        font-size: 0.76rem;
+        font-size: 0.82rem;
       }
 
       .hero-ampersand {
-        margin: 0;
-        font-size: 1.65rem;
+        margin: 2px 0;
+        font-size: 1.8rem;
       }
 
       .hero-message {
-        font-size: 0.88rem;
-        line-height: 1.35;
+        font-size: 0.94rem;
+        line-height: 1.42;
+      }
+
+      .hero-floral-divider {
+        width: 138px;
       }
 
       .story-stage {
@@ -1760,6 +1876,23 @@
         height: 390px;
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stage-florals-top,
+      .stage-florals-top > g,
+      .book-3d,
+      .hero-emblem,
+      .scroll-cue,
+      .tassel-svg,
+      .pull-hint-badge,
+      .music-control.is-playing,
+      .book-stage.is-opening .cover-face::after,
+      .scroll-artifact-wrapper.is-unrolling .scroll-parchment::after,
+      .scroll-artifact-wrapper.is-unrolling .scroll-bottom-roller,
+      .scroll-artifact-wrapper.is-unrolling::before {
+        animation: none !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1770,6 +1903,7 @@
       <circle cx="16" cy="16" r="3"/>
     </svg>
   </button>
+  <canvas id="petals-canvas" aria-hidden="true"></canvas>
 
   <!-- ========================================================================
        SECTION 1 — OPENING: 3D VELVET WEDDING INVITATION BOOK
@@ -1878,7 +2012,7 @@
          ====================================================================== -->
     <section id="section-hero" aria-label="Couple Invitation Introduction">
       <div class="hero-photo-backdrop">
-        <img id="hero-bg-img" src="" alt="Couple wedding portrait" />
+        <img id="hero-bg-img" src="" alt="Couple wedding portrait" fetchpriority="high" decoding="async" />
         <div class="hero-photo-overlay"></div>
       </div>
 
@@ -1890,6 +2024,13 @@
 
         <div class="hero-emblem blur-reveal" id="hero-emblem-slot"></div>
         <p class="hero-intro-line blur-reveal" id="hero-intro-text">Together With Their Families</p>
+        <svg class="hero-floral-divider" viewBox="0 0 160 20" fill="none" aria-hidden="true">
+          <path d="M4 10H61M99 10H156" stroke="currentColor" stroke-width="1"/>
+          <path d="M80 2C70 8 70 12 80 18C90 12 90 8 80 2Z" fill="var(--color-floral-1)" opacity="0.8"/>
+          <circle cx="80" cy="10" r="3" fill="var(--color-metallic-light)"/>
+          <circle cx="69" cy="10" r="2" fill="var(--color-floral-3)"/>
+          <circle cx="91" cy="10" r="2" fill="var(--color-floral-2)"/>
+        </svg>
 
         <div class="hero-couple-block">
           <h2 class="hero-person-name" id="hero-groom-name" aria-label="Groom's Name"></h2>
@@ -2347,103 +2488,49 @@
         }
       ],
       media: {
-        openingPhotoIndex: 8, // DSC_6947.jpg (Traditional attire portrait)
+        openingPhotoIndex: 0,
         photos: [
           {
-            id: "DSC_6330",
-            label: "DSC_6330.jpg",
-            src: "photos/DSC_6330.jpg",
+            id: "IMG_2692",
+            label: "IMG_2692.JPG",
+            src: "photos/IMG_2692.JPG",
             caption: "A beautiful moment, forever cherished"
           },
           {
-            id: "DSC_6380",
-            label: "DSC_6380.jpg",
-            src: "photos/DSC_6380.jpg",
+            id: "IMG_2693",
+            label: "IMG_2693.JPG",
+            src: "photos/IMG_2693.JPG",
             caption: "Smiles that tell our story"
           },
           {
-            id: "DSC_6433",
-            label: "DSC_6433.jpg",
-            src: "photos/DSC_6433.jpg",
+            id: "IMG_2694",
+            label: "IMG_2694.JPG",
+            src: "photos/IMG_2694.JPG",
             caption: "Together is our favourite place"
           },
           {
-            id: "DSC_6446",
-            label: "DSC_6446.jpg",
-            src: "photos/DSC_6446.jpg",
+            id: "IMG_2695",
+            label: "IMG_2695.JPG",
+            src: "photos/IMG_2695.JPG",
             caption: "Two hearts celebrating together"
           },
           {
-            id: "DSC_6583",
-            label: "DSC_6583.jpg",
-            src: "photos/DSC_6583.jpg",
+            id: "IMG_2696",
+            label: "IMG_2696.JPG",
+            src: "photos/IMG_2696.JPG",
             caption: "A promise written in moments"
           },
           {
-            id: "DSC_6636",
-            label: "DSC_6636.jpg",
-            src: "photos/DSC_6636.jpg",
+            id: "IMG_2697",
+            label: "IMG_2697.JPG",
+            src: "photos/IMG_2697.JPG",
             caption: "Wrapped in love and laughter"
           },
           {
-            id: "DSC_6716",
-            label: "DSC_6716.jpg",
-            src: "photos/DSC_6716.jpg",
+            id: "IMG_2698",
+            label: "IMG_2698.JPG",
+            src: "photos/IMG_2698.JPG",
             caption: "Memories made beautifully"
-          },
-          {
-            id: "DSC_6797",
-            label: "DSC_6797.jpg",
-            src: "photos/DSC_6797.jpg",
-            caption: "With you, every moment is special"
-          },
-          {
-            id: "DSC_6947",
-            label: "DSC_6947.jpg",
-            src: "photos/DSC_6947.jpg",
-            caption: "Blessed in tradition, bound in love"
-          },
-          {
-            id: "DSC_7109",
-            label: "DSC_7109.jpg",
-            src: "photos/DSC_7109.jpg",
-            caption: "Love in every little detail"
-          },
-          {
-            id: "DSC_7185",
-            label: "DSC_7185.jpg",
-            src: "photos/DSC_7185.jpg",
-            caption: "Two souls, one sacred path"
-          },
-          {
-            id: "DSC_7201",
-            label: "DSC_7201.jpg",
-            src: "photos/DSC_7201.jpg",
-            caption: "Walking hand in hand into forever"
-          },
-          {
-            id: "DSC_7201_1",
-            label: "DSC_7201 (1).jpg",
-            src: "photos/DSC_7201 (1).jpg",
-            caption: "A joyful journey side by side"
-          },
-          {
-            id: "DSC_7214",
-            label: "DSC_7214.jpg",
-            src: "photos/DSC_7214.jpg",
-            caption: "Celebrating the love we share"
-          },
-          {
-            id: "DSC_7245",
-            label: "DSC_7245.jpg",
-            src: "photos/DSC_7245.jpg",
-            caption: "A moment to hold in our hearts"
-          },
-          {
-            id: "DSC_7280",
-            label: "DSC_7280.jpg",
-            src: "photos/DSC_7280.jpg",
-            caption: "Every moment with you is a melody"
           }
         ]
       },
@@ -2818,7 +2905,9 @@
       const cleanLabel = (label || "").trim();
       const cleanParents = (parents || "").trim();
       if (!cleanLabel && !cleanParents) return "";
-      if (cleanLabel && cleanParents) return `${escapeHtml(cleanLabel)} <strong>${escapeHtml(cleanParents)}</strong>`;
+      if (cleanLabel && cleanParents) {
+        return `<span class="family-relation">${escapeHtml(cleanLabel)}</span><strong>${escapeHtml(cleanParents)}</strong>`;
+      }
       return `<strong>${escapeHtml(cleanParents || cleanLabel)}</strong>`;
     }
 
@@ -2981,6 +3070,9 @@
     let ambientAudioContext = null;
     let ambientMasterGain = null;
     let ambientOscillators = [];
+    let ambientPadOscillators = [];
+    let ambientMusicTimer = null;
+    let ambientMusicStep = 0;
     let musicPlaying = false;
 
     function setMusicControlState(isPlaying) {
@@ -2999,31 +3091,83 @@
       if (!ambientAudioContext) {
         ambientAudioContext = new AudioContextClass();
         ambientMasterGain = ambientAudioContext.createGain();
-        ambientMasterGain.gain.value = 0.035;
+        ambientMasterGain.gain.value = 0.0001;
         ambientMasterGain.connect(ambientAudioContext.destination);
       }
 
+      if (ambientPadOscillators.length === 0) {
+        const padFrequencies = [130.81, 164.81, 196];
+        ambientPadOscillators = padFrequencies.map((frequency, index) => {
+          const oscillator = ambientAudioContext.createOscillator();
+          const gain = ambientAudioContext.createGain();
+          oscillator.type = index === 0 ? "sine" : "triangle";
+          oscillator.frequency.value = frequency;
+          gain.gain.value = index === 0 ? 0.16 : 0.08;
+          oscillator.connect(gain);
+          gain.connect(ambientMasterGain);
+          oscillator.start();
+          return oscillator;
+        });
+      }
+
       ambientAudioContext.resume();
-      ambientOscillators = [261.63, 329.63, 392].map((frequency, index) => {
+      const chords = [
+        [130.81, 164.81, 196],
+        [98, 123.47, 146.83],
+        [110, 130.81, 164.81],
+        [87.31, 110, 130.81]
+      ];
+      const melody = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46];
+      ambientMusicStep = 0;
+      ambientMasterGain.gain.setTargetAtTime(0.055, ambientAudioContext.currentTime, 0.8);
+
+      const playNote = (frequency) => {
         const oscillator = ambientAudioContext.createOscillator();
         const gain = ambientAudioContext.createGain();
-        oscillator.type = index === 0 ? "sine" : "triangle";
+        oscillator.type = "sine";
         oscillator.frequency.value = frequency;
-        gain.gain.value = index === 0 ? 0.45 : 0.18;
+        const now = ambientAudioContext.currentTime;
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(0.22, now + 0.035);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
         oscillator.connect(gain);
         gain.connect(ambientMasterGain);
         oscillator.start();
+        oscillator.stop(now + 1.45);
+        oscillator.addEventListener("ended", () => {
+          ambientOscillators = ambientOscillators.filter((active) => active !== oscillator);
+          gain.disconnect();
+        }, { once: true });
         return oscillator;
-      });
+      };
+
+      const playStep = () => {
+        const chord = chords[Math.floor(ambientMusicStep / 8) % chords.length];
+        ambientPadOscillators.forEach((oscillator, index) => {
+          oscillator.frequency.setTargetAtTime(chord[index], ambientAudioContext.currentTime, 0.8);
+        });
+        ambientOscillators.push(playNote(melody[ambientMusicStep % melody.length]));
+        ambientMusicStep += 1;
+      };
+      playStep();
+      ambientMusicTimer = window.setInterval(playStep, 700);
       musicPlaying = true;
       setMusicControlState(true);
     }
 
     function stopAmbientMusic() {
-      ambientOscillators.forEach((oscillator) => {
-        try { oscillator.stop(); } catch (_) {}
-      });
+      if (ambientMusicTimer !== null) {
+        window.clearInterval(ambientMusicTimer);
+        ambientMusicTimer = null;
+      }
+      if (ambientAudioContext && ambientMasterGain) {
+        ambientMasterGain.gain.setTargetAtTime(0.0001, ambientAudioContext.currentTime, 0.15);
+      }
       ambientOscillators = [];
+      ambientPadOscillators.forEach((oscillator) => {
+        oscillator.stop();
+      });
+      ambientPadOscillators = [];
       musicPlaying = false;
       setMusicControlState(false);
     }
@@ -3042,7 +3186,11 @@
       const bookSection = document.getElementById("section-book");
 
       bookStage.classList.add("is-opening");
-      spawnBurstPetals(38);
+      const bookBounds = bookStage.getBoundingClientRect();
+      spawnBurstPetals(72, {
+        x: bookBounds.left + bookBounds.width / 2,
+        y: bookBounds.top + bookBounds.height * 0.58
+      });
 
       setTimeout(() => {
         bookSection.classList.add("book-opened-fade");
@@ -3060,9 +3208,15 @@
       if (!wrapper || appState.scrollUnrolled) return;
 
       appState.scrollUnrolled = true;
+      wrapper.classList.add("is-unrolling");
       wrapper.classList.add("unrolled");
       parchment.setAttribute("aria-hidden", "false");
-      spawnBurstPetals(24);
+      const handleBounds = document.getElementById("tassel-handle").getBoundingClientRect();
+      spawnGoldenSparkles(22, {
+        x: handleBounds.left + handleBounds.width / 2,
+        y: handleBounds.top + 10
+      });
+      window.setTimeout(() => wrapper.classList.remove("is-unrolling"), 1400);
     }
 
     function initScrollTasselInteraction() {
@@ -3292,9 +3446,10 @@
         frame.className = "story-photo-frame";
 
         const img = document.createElement("img");
-        img.src = photo.src;
         img.alt = photo.caption || `${WEDDING_CONFIG.couple.groomName} and ${WEDDING_CONFIG.couple.brideName}`;
-        img.loading = "eager";
+        img.dataset.src = photo.src;
+        img.loading = "lazy";
+        img.decoding = "async";
         attachImageFallback(img, photo.label);
 
         frame.appendChild(img);
@@ -3344,6 +3499,8 @@
 
       slides.forEach((slide, idx) => {
         slide.classList.remove("is-center", "is-prev", "is-next", "is-hidden");
+        const img = slide.querySelector("img");
+        const isNearby = idx === activeIdx || idx === prevIdx || idx === nextIdx;
         if (idx === activeIdx) {
           slide.classList.add("is-center");
         } else if (idx === prevIdx) {
@@ -3352,6 +3509,12 @@
           slide.classList.add("is-next");
         } else {
           slide.classList.add("is-hidden");
+        }
+        if (img && isNearby) {
+          img.fetchPriority = idx === activeIdx ? "high" : "low";
+          if (!img.getAttribute("src")) {
+            img.src = img.dataset.src;
+          }
         }
       });
 
@@ -3385,24 +3548,55 @@
     const petals = [];
     let petalAnimRunning = false;
 
-    function spawnBurstPetals(count = 20) {
+    function spawnBurstPetals(count = 20, origin = null) {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const colors = [
         getComputedStyle(document.documentElement).getPropertyValue("--color-floral-1").trim() || "#D98A2B",
         getComputedStyle(document.documentElement).getPropertyValue("--color-floral-2").trim() || "#E6B85C",
-        getComputedStyle(document.documentElement).getPropertyValue("--color-metallic-light").trim() || "#E8CF8E"
+        getComputedStyle(document.documentElement).getPropertyValue("--color-metallic-light").trim() || "#E8CF8E",
+        "#E58B9B",
+        "#F4D8C8"
       ];
       const w = window.innerWidth;
       for (let i = 0; i < count; i++) {
         petals.push({
-          x: Math.random() * w,
-          y: -20 - Math.random() * 140,
-          size: 5 + Math.random() * 6,
-          speedY: 1.1 + Math.random() * 1.6,
-          speedX: (Math.random() - 0.5) * 1.2,
+          kind: "petal",
+          x: origin ? origin.x + (Math.random() - 0.5) * 180 : Math.random() * w,
+          y: origin ? origin.y + (Math.random() - 0.5) * 80 : -20 - Math.random() * 140,
+          size: origin ? 9 + Math.random() * 8 : 7 + Math.random() * 7,
+          speedY: origin ? -3.2 + Math.random() * 1.8 : 1.1 + Math.random() * 1.6,
+          speedX: origin ? (Math.random() - 0.5) * 3.2 : (Math.random() - 0.5) * 1.2,
+          gravity: origin ? 0.075 : 0,
           rot: Math.random() * Math.PI * 2,
           rotSpeed: (Math.random() - 0.5) * 0.05,
           color: colors[i % colors.length],
-          alpha: 0.75 + Math.random() * 0.25
+          alpha: 0.78 + Math.random() * 0.22,
+          age: 0
+        });
+      }
+      if (!petalAnimRunning) {
+        petalAnimRunning = true;
+        requestAnimationFrame(animatePetals);
+      }
+    }
+
+    function spawnGoldenSparkles(count, origin) {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const colors = ["#FFF0B8", "#E8CF8E", "#C59B43", "#FFFDF1"];
+      for (let i = 0; i < count; i++) {
+        petals.push({
+          kind: "sparkle",
+          x: origin.x + (Math.random() - 0.5) * 100,
+          y: origin.y + (Math.random() - 0.5) * 34,
+          size: 3 + Math.random() * 5,
+          speedY: -1.8 + Math.random() * 1.1,
+          speedX: (Math.random() - 0.5) * 2.8,
+          gravity: 0.055,
+          rot: Math.random() * Math.PI,
+          rotSpeed: (Math.random() - 0.5) * 0.08,
+          color: colors[i % colors.length],
+          alpha: 0.8 + Math.random() * 0.2,
+          age: 0
         });
       }
       if (!petalAnimRunning) {
@@ -3425,21 +3619,50 @@
 
       for (let i = petals.length - 1; i >= 0; i--) {
         const p = petals[i];
+        p.speedY += p.gravity;
         p.y += p.speedY;
         p.x += p.speedX + Math.sin(p.y * 0.02) * 0.5;
         p.rot += p.rotSpeed;
+        p.age += 1;
 
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
-        ctx.globalAlpha = p.alpha;
+        ctx.globalAlpha = p.alpha * Math.min(1, Math.max(0, (canvas.height + 30 - p.y) / 80));
         ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, Math.PI * 2);
-        ctx.fill();
+        if (p.kind === "sparkle") {
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 12;
+          ctx.beginPath();
+          ctx.moveTo(0, -p.size);
+          ctx.quadraticCurveTo(p.size * 0.22, -p.size * 0.22, p.size, 0);
+          ctx.quadraticCurveTo(p.size * 0.22, p.size * 0.22, 0, p.size);
+          ctx.quadraticCurveTo(-p.size * 0.22, p.size * 0.22, -p.size, 0);
+          ctx.quadraticCurveTo(-p.size * 0.22, -p.size * 0.22, 0, -p.size);
+          ctx.fill();
+        } else {
+          const petalGradient = ctx.createLinearGradient(-p.size, 0, p.size, 0);
+          petalGradient.addColorStop(0, p.color);
+          petalGradient.addColorStop(0.52, "#FFF1D6");
+          petalGradient.addColorStop(1, p.color);
+          ctx.fillStyle = petalGradient;
+          ctx.shadowColor = "rgba(98, 43, 48, 0.2)";
+          ctx.shadowBlur = 5;
+          ctx.beginPath();
+          ctx.moveTo(0, -p.size);
+          ctx.bezierCurveTo(p.size * 0.9, -p.size * 0.4, p.size * 0.78, p.size * 0.62, 0, p.size);
+          ctx.bezierCurveTo(-p.size * 0.78, p.size * 0.62, -p.size * 0.9, -p.size * 0.4, 0, -p.size);
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.48)";
+          ctx.lineWidth = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(0, -p.size * 0.65);
+          ctx.quadraticCurveTo(p.size * 0.08, 0, 0, p.size * 0.68);
+          ctx.stroke();
+        }
         ctx.restore();
 
-        if (p.y > canvas.height + 30) {
+        if (p.y > canvas.height + 30 || p.age > 720) {
           petals.splice(i, 1);
         }
       }
@@ -3707,7 +3930,7 @@
       });
     });
 
-    window.addEventListener("load", () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const preloader = document.getElementById("preloader");
       setTimeout(() => {
         preloader.classList.add("hidden");
